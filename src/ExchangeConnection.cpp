@@ -20,14 +20,10 @@ boost::system::error_code ExchangeConnection::establishConnection()
     try {
         auto const results = resolver_.resolve(host_, port_);
 
-        if (results.empty()) {
-            BOOST_LOG_TRIVIAL(error) << "Can't resolve host :" << host_ << "\n";
-            return boost::asio::error::host_not_found;
-        }
-
-
+        /*
         boost::asio::socket_base::keep_alive keep_alive_option(true);
-        //socket_.set_option(keep_alive_option);
+        socket_.set_option(keep_alive_option);
+         */
         boost::asio::connect(socket_, results.begin(), results.end());
 
         if (!socket_.is_open()) {
@@ -41,6 +37,7 @@ boost::system::error_code ExchangeConnection::establishConnection()
         req.set(http::field::host, host_);
         req.set(http::field::user_agent, "Botty");
         req.set(http::field::keep_alive, true);
+
         //Send an http request to keep the connection alive
         http::write(socket_, req);
 
