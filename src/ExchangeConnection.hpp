@@ -3,23 +3,30 @@
 //
 #include <string>
 #include <boost/asio.hpp>
+#include <boost/beast/core.hpp>
+#include <boost/beast/http.hpp>
 #include <boost/system/error_code.hpp>
 
-using namespace boost::asio;
+
 
 class ExchangeConnection
 {
 public:
-    ExchangeConnection(std::string url);
+    ExchangeConnection(std::string host, std::string port, std::string target);
     ExchangeConnection(const ExchangeConnection& that) = delete;
     ExchangeConnection&operator=(ExchangeConnection const&) = delete;
 
-    boost::system::error_code getTickersJson(std::string & strJson);
-    boost::system::error_code getBalanceJson(std::string & strJson);
+    boost::system::error_code getTickersJson(std::string& strJson);
+    boost::system::error_code getBalanceJson(std::string& strJson);
     boost::system::error_code sendOrder(const std::string& ordJson, std::string& responceJson);
-private:
     boost::system::error_code establishConnection();
-    std::string url_;
+private:
+    std::string host_;
+    std::string port_;
+    std::string target_;
+    boost::asio::io_context ioc_;
+    boost::asio::ip::tcp::resolver resolver_;
+    boost::asio::ip::tcp::socket socket_;
 };
 
 

@@ -9,15 +9,12 @@
 
 int main(int argc, char *argv[])
 {
-    ExchangeConnection exchange("PUT IP HERE");
+    ExchangeConnection exchange("localhost", "3000", "/posts");
     JsonParser parser;
-
-
 
     while(true)
     {
-
+        std::cout << exchange.establishConnection().message() << std::endl;
     }
-
 
 }
