@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.9)
 project(BoostHttp)
 set(Boost_USE_STATIC_LIBS ON)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 11)
 
 find_package(Boost COMPONENTS system filesystem REQUIRED)
 add_library(boost INTERFACE IMPORTED)
@@ -13,7 +13,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall")
 
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
-add_executable(botty main.cpp ExchangeConnection.cpp ExchangeConnection.hpp order.hpp JsonParser.cpp JsonParser.hpp matrix.cpp matrix.hpp OrderResponse.hpp OptimalOrders.cpp OptimalOrders.hpp)
+add_executable(botty src/main.cpp src/ExchangeConnection.cpp src/ExchangeConnection.hpp src/order.hpp src/JsonParser.cpp src/JsonParser.hpp src/matrix.cpp src/matrix.hpp src/OrderResponse.hpp src/OptimalOrders.cpp src/OptimalOrders.hpp)
 
 
 target_link_libraries(botty

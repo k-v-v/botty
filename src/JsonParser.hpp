@@ -17,8 +17,8 @@
 
 class JsonParser {
 public:
-    void decodeTickers(matrix& jsonStr, const std::string& jsonStr);
-    void decodeResponce(OrderResponse& response, const std::string& str)
+    void decodeTickers(matrix& mat, const std::string& jsonStr);
+    void decodeResponce(OrderResponse& response, const std::string& str);
     std::string encodeOrder(order order);
 private:
     std::vector<std::string> idToName_;
