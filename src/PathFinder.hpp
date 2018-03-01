@@ -10,7 +10,7 @@
 #include <vector>
 #include <algorithm>
 
-typedef short path[MATRIX_DIM][MATRIX_DIM][MATRIX_DIM];
+typedef short path[NUMBER_CURRENCIES][NUMBER_CURRENCIES][NUMBER_CURRENCIES];
 
 class PathFinder
 {
@@ -23,7 +23,7 @@ public:
 private:
     path path_;
     matrix initial_rates_;
-    matrix benefits_[MATRIX_DIM];
+    matrix benefits_[NUMBER_CURRENCIES];
     std::vector<short> ConstructPath(short x, short y);
 };
 

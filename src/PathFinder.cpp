@@ -12,19 +12,19 @@ PathFinder::PathFinder(const matrix m)
      * THIS MIGHT NEED CHANGING AS IT WILL BE TOO SLOW TO COPY OER MEMORY ALL THE TIME
      *
      */
-    std::copy(&m[0][0], &m[0][0] + MATRIX_DIM * MATRIX_DIM, &initial_rates_[0][0]);
+    std::copy(&m[0][0], &m[0][0] + NUMBER_CURRENCIES * NUMBER_CURRENCIES, &initial_rates_[0][0]);
 
-    for (int i = 1; i < MATRIX_DIM; ++i)
-        for (int j = 0; j < MATRIX_DIM; ++j)
-            for (int k = 0; k < MATRIX_DIM; ++k)
+    for (int i = 1; i < NUMBER_CURRENCIES; ++i)
+        for (int j = 0; j < NUMBER_CURRENCIES; ++j)
+            for (int k = 0; k < NUMBER_CURRENCIES; ++k)
                 benefits_[i][j][k] = 0;
 }
 
 void PathFinder::initialize()
 {
-    for (short i = 0; i < MATRIX_DIM; ++i)
+    for (short i = 0; i < NUMBER_CURRENCIES; ++i)
     {
-        for (short j = 0; j < MATRIX_DIM; ++j)
+        for (short j = 0; j < NUMBER_CURRENCIES; ++j)
         {
             //the most affordable path of 1 form i to j is to go directly
             if (initial_rates_[i][j] > 0)
@@ -36,7 +36,7 @@ void PathFinder::initialize()
 
 void PathFinder::SetRates(const matrix &m)
 {
-    std::copy(&m[0][0], &m[0][0] + MATRIX_DIM * MATRIX_DIM, &initial_rates_[0][0]);
+    std::copy(&m[0][0], &m[0][0] + NUMBER_CURRENCIES * NUMBER_CURRENCIES, &initial_rates_[0][0]);
 }
 
 std::vector<short> PathFinder::GetPath()
@@ -44,13 +44,13 @@ std::vector<short> PathFinder::GetPath()
     double max_profit = 0;
     short max_profit_len = 0, max_profit_start = 0;
 
-    for (short path_len = 1; path_len < MATRIX_DIM; ++path_len)
+    for (short path_len = 1; path_len < NUMBER_CURRENCIES; ++path_len)
     {
-        for (short from = 0; from < MATRIX_DIM; ++from)
+        for (short from = 0; from < NUMBER_CURRENCIES; ++from)
         {
-            for (short to = 0; to < MATRIX_DIM; ++to)
+            for (short to = 0; to < NUMBER_CURRENCIES; ++to)
             {
-                for (short through = 0; through < MATRIX_DIM; ++through)
+                for (short through = 0; through < NUMBER_CURRENCIES; ++through)
                 {
                     double possible_benefit = initial_rates_[from][through] * benefits_[path_len - 1][through][to];
                     double* current_benefit = &benefits_[path_len][from][to];

@@ -4,6 +4,6 @@
 
 #pragma once
 
-class matrix {
+#define NUMBER_CURRENCIES 33
 
-};
+typedef double matrix[NUMBER_CURRENCIES][NUMBER_CURRENCIES];
