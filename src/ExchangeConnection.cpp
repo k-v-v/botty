@@ -12,6 +12,7 @@ namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
 ExchangeConnection::ExchangeConnection(std::string host, std::string port, std::string target)
     : host_(host), port_(port), target_(target), resolver_(ioc_), socket_(ioc_)
 {
+
 }
 
 boost::system::error_code ExchangeConnection::establishConnection()
@@ -19,14 +20,10 @@ boost::system::error_code ExchangeConnection::establishConnection()
     try {
         auto const results = resolver_.resolve(host_, port_);
 
-        if (results.empty()) {
-            BOOST_LOG_TRIVIAL(error) << "Can't resolve host :" << host_ << "\n";
-            return boost::asio::error::host_not_found;
-        }
-
-
+        /*
         boost::asio::socket_base::keep_alive keep_alive_option(true);
-        //socket_.set_option(keep_alive_option);
+        socket_.set_option(keep_alive_option);
+         */
         boost::asio::connect(socket_, results.begin(), results.end());
 
         if (!socket_.is_open()) {
@@ -35,23 +32,23 @@ boost::system::error_code ExchangeConnection::establishConnection()
         }
         BOOST_LOG_TRIVIAL(info) << "Opened socket to " << host_ << " :" << port_ << "\n";
 
-//
-//        http::request<http::string_body> req{http::verb::get, target_, 11};
-//        req.set(http::field::host, host_);
-//        req.set(http::field::user_agent, "Botty");
-//        req.set(http::field::keep_alive, true);
-//        //Send an http request to keep the connection alive
-//        http::write(socket_, req);
-//
-//        //Buffer to store the reply in
-//        boost::beast::flat_buffer response_buffer;
-//        http::response<http::string_body> response;
-//
-//        http::read(socket_, response_buffer, response);
-//
-//        BOOST_LOG_TRIVIAL(info) << "Got response from server \n"
-//                                << response.body();
-//
+
+        http::request<http::string_body> req{http::verb::get, target_, 11};
+        req.set(http::field::host, host_);
+        req.set(http::field::user_agent, "Botty");
+        req.set(http::field::keep_alive, true);
+
+        //Send an http request to keep the connection alive
+        http::write(socket_, req);
+
+        //Buffer to store the reply in
+        boost::beast::flat_buffer response_buffer;
+        http::response<http::string_body> response;
+
+        http::read(socket_, response_buffer, response);
+
+        BOOST_LOG_TRIVIAL(info) << "Got response from server \n"
+                                << response.body();
     }catch(boost::system::system_error& e)
     {
         BOOST_LOG_TRIVIAL(error) << "Exception in establish connection " << e.what() << "\n";
@@ -94,17 +91,17 @@ boost::system::error_code ExchangeConnection::getBalanceJson(std::string& strJso
 }
 
 
-boost::system::error_code ExchangeConnection::getTickerJson(std::string ticker, std::string &strJson)
+boost::system::error_code ExchangeConnection::getTickersJson(std::string &strJson)
 {
     try{
-        http::request<http::string_body> req{http::verb::get, target_+"?"+ticker, 11};
+        http::request<http::string_body> req{http::verb::post, target_, 11};
         req.set(http::field::host, host_);
         req.set(http::field::user_agent, "Botty");
         req.set(http::field::keep_alive, true);
         //Set the request body
-        //req.body() = "GIVE ME ALL THE TICKERS!!!!";
+        req.body() = "GIVE ME ALL THE TICKERS!!!!";
         //Calculate the body size for the header
-        //req.prepare_payload();
+        req.prepare_payload();
 
         //Send an http request to keep the connection alive
         http::write(socket_, req);
