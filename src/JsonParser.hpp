@@ -10,6 +10,8 @@
 #include <unordered_map>
 
 #include <rapidjson/document.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include "matrix.hpp"
 #include "order.hpp"
@@ -17,9 +19,12 @@
 
 class JsonParser {
 public:
-    void decodeTickers(matrix& mat, const std::string& jsonStr);
-    void decodeResponce(OrderResponse& response, const std::string& str);
-    std::string encodeOrder(order order);
+    JsonParser();
+    void initialize(const std::string basePair, const std::string& tickers);
+    void decodeTickers(matrix& mat, const std::vector<std::string>& jsonStr)const;
+    void decodeResponce(OrderResponse& response, const std::string& str)const;
+    std::string encodeOrder(order order)const;
+    const std::vector<std::string>& getCurrencies()const;
 private:
     std::vector<std::string> idToName_;
     std::unordered_map<std::string, int> nameToId_;

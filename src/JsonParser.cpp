@@ -3,8 +3,37 @@
 //
 
 #include "JsonParser.hpp"
+#include <iostream>
 
-std::string JsonParser::encodeOrder(order order) {
+
+
+
+
+JsonParser::JsonParser()
+{
+    initialized_  = false;
+}
+
+
+void JsonParser::initialize(const std::string basePair, const std::string& tickers)
+{
+    if (initialized_)
+        return;
+
+    rapidjson::Document doc;
+    doc.Parse(tickers.c_str());
+
+    idToName_.push_back(basePair);
+    nameToId_.insert(std::make_pair(basePair, idToName_.size() - 1));
+    for (auto& e: doc["rates"].GetObject())
+    {
+        idToName_.push_back(e.name.GetString());
+        nameToId_.insert(std::make_pair(e.name.GetString(), idToName_.size() - 1));
+    }
+    initialized_ = true;
+}
+std::string JsonParser::encodeOrder(order order)const
+{
     rapidjson::Document doc;
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> result_writer(buffer);
@@ -27,7 +56,8 @@ std::string JsonParser::encodeOrder(order order) {
     return (std::string) buffer.GetString();
 }
 
-void JsonParser::decodeResponce(OrderResponse &response, const std::string &str) {
+void JsonParser::decodeResponce(OrderResponse &response, const std::string &str)const
+{
     rapidjson::Document doc;
     bool success;
     double amount;
@@ -46,11 +76,16 @@ void JsonParser::decodeResponce(OrderResponse &response, const std::string &str)
     response.status = success ? OrderResponse::order_successful : OrderResponse::order_unsuccessful;
 }
 
-void JsonParser::decodeTickers(matrix &mat, const std::vector<std::string>& json_tickers) {
+void JsonParser::decodeTickers(matrix &mat, const std::vector<std::string>& json_tickers)const
+{
     int i = 0;
-    for (auto&& jsonTicker : json_tickers) {
+    for (auto& jsonTicker : json_tickers) {
         rapidjson::Document response;
         response.Parse(jsonTicker.c_str());
+        if (!initialized_)
+        {
+
+        }
 
         //for each child at index j of response containing a value
         //  if j == i
@@ -61,4 +96,8 @@ void JsonParser::decodeTickers(matrix &mat, const std::vector<std::string>& json
 
         i++;
     }
+}
+const std::vector<std::string>& JsonParser::getCurrencies()const
+{
+    return idToName_;
 }

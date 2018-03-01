@@ -3,18 +3,30 @@
 
 #include "ExchangeConnection.hpp"
 #include "JsonParser.hpp"
+#include "matrix.hpp"
 #include "OptimalOrders.hpp"
 #include "OrderResponse.hpp"
 
 
 int main(int argc, char *argv[])
 {
-    ExchangeConnection exchange("localhost", "3000", "/posts");
+    https://api.fixer.io/latest
+    ExchangeConnection exchange("api.fixer.io", "80", "/latest");
     JsonParser parser;
+    exchange.establishConnection();
+    std::string response;
 
-    while(true)
+    exchange.getTickerJson("USD",response);
+    parser.initialize("USD",response);
+
+
+    for(auto& e: parser.getCurrencies())
     {
-        std::cout << exchange.establishConnection().message() << std::endl;
+        std::cout << e << std::endl;
     }
+    matrix mat;
+    std::vector<std::string> jsonTickers;
+    jsonTickers.push_back(response);
+    parser.decodeTickers(mat, jsonTickers);
 
 }

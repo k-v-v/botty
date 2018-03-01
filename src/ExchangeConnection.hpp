@@ -16,10 +16,11 @@ public:
     ExchangeConnection(const ExchangeConnection& that) = delete;
     ExchangeConnection&operator=(ExchangeConnection const&) = delete;
 
-    boost::system::error_code getTickersJson(std::string& strJson);
+    boost::system::error_code getTickerJson(std::string ticker, std::string& strJson);
     boost::system::error_code getBalanceJson(std::string& strJson);
     boost::system::error_code sendOrder(const std::string& ordJson, std::string& responceJson);
     boost::system::error_code establishConnection();
+    bool isOpen();
 private:
     std::string host_;
     std::string port_;
