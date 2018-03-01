@@ -22,7 +22,7 @@ public:
     JsonParser();
     void initialize(const std::string basePair, const std::string& tickers);
     void decodeTickers(matrix& mat, const std::vector<std::string>& jsonStr)const;
-    void decodeResponce(OrderResponse& response, const std::string& str)const;
+    void decodeResponse(OrderResponse& response, const std::string& str)const;
     std::string encodeOrder(order order)const;
     const std::vector<std::string>& getCurrencies()const;
 private:

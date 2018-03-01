@@ -56,7 +56,7 @@ std::string JsonParser::encodeOrder(order order)const
     return (std::string) buffer.GetString();
 }
 
-void JsonParser::decodeResponce(OrderResponse &response, const std::string &str)const
+void JsonParser::decodeResponse(OrderResponse &response, const std::string &str)const
 {
     rapidjson::Document doc;
     bool success;
