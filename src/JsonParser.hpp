@@ -19,12 +19,12 @@
 
 class JsonParser {
 public:
-    JsonParser();
-    void initialize(const std::string basePair, const std::string& tickers);
-    void decodeTickers(matrix& mat, const std::vector<std::string>& jsonStr)const;
-    void decodeResponce(OrderResponse& response, const std::string& str)const;
-    std::string encodeOrder(order order)const;
-    const std::vector<std::string>& getCurrencies()const;
+    JsonParser::JsonParser();
+    void JsonParser::initialize(const std::string basePair, const std::string& tickers);
+    void JsonParser::decodeTickers(matrix& mat, const std::vector<std::string>& jsonStr)const;
+    void JsonParser::decodeResponce(OrderResponse& response, const std::string& str)const;
+    std::string JsonParser::encodeOrder(order order)const;
+    const std::vector<std::string>& JsonParser::getCurrencies()const;
 private:
     std::vector<std::string> idToName_;
     std::unordered_map<std::string, int> nameToId_;
