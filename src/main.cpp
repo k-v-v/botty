@@ -8,6 +8,11 @@
 #include "OrderResponse.hpp"
 
 
+
+void* operator new (size_t size, const char* filename, int line) {
+    void* ptr = new char[size];
+    return ptr;
+}
 int main(int argc, char *argv[])
 {
     https://api.fixer.io/latest
