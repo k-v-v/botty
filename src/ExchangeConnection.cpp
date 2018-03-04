@@ -83,7 +83,7 @@ boost::system::error_code ExchangeConnection::getBalanceJson(std::string& strJso
         http::read(socket_, response_buffer, response);
 
         //BOOST_LOG_TRIVIAL(info) << "Got balance from server \n"
-                                << response.body();
+        //                        << response.body();
         strJson = std::move(response.body());
     }catch (boost::system::system_error& e)
     {
@@ -94,7 +94,7 @@ boost::system::error_code ExchangeConnection::getBalanceJson(std::string& strJso
 }
 
 
-boost::system::error_code ExchangeConnection::getTickerJson(std::string ticker, std::string &strJson)
+boost::system::error_code ExchangeConnection::getTickerJson(const std::string& ticker, std::string &strJson)
 {
     try{
         http::request<http::string_body> req{http::verb::get, target_+"?"+ticker, 11};
@@ -116,7 +116,7 @@ boost::system::error_code ExchangeConnection::getTickerJson(std::string ticker, 
         http::read(socket_, response_buffer, response);
 
         //BOOST_LOG_TRIVIAL(info) << "Got tickers from server \n"
-                                << response.body();
+        //                        << response.body();
         strJson = std::move(response.body());
 
     }catch (boost::system::system_error& e)
@@ -128,7 +128,7 @@ boost::system::error_code ExchangeConnection::getTickerJson(std::string ticker, 
 }
 
 
-boost::system::error_code ExchangeConnection::sendOrder(const std::string &ordJson, std::string &responceJson)
+boost::system::error_code ExchangeConnection::sendOrder(std::string_view ordJson, std::string &responceJson)
 {
     try {
         http::request<http::string_body> req{http::verb::post, target_, 11};
@@ -150,7 +150,7 @@ boost::system::error_code ExchangeConnection::sendOrder(const std::string &ordJs
         http::read(socket_, response_buffer, response);
 
         //BOOST_LOG_TRIVIAL(info) << "Got made order to server \n"
-                                << response.body();
+        //                        << response.body();
         responceJson = std::move(response.body());
     }catch (boost::system::system_error& e)
     {

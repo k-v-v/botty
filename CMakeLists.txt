@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.9)
 project(BoostHttp)
 
 set(Boost_USE_STATIC_LIBS ON)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
-SET (CMAKE_CXX_COMPILER "/usr/bin/clang++")
+SET (CMAKE_CXX_COMPILER "/usr/bin/g++")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -O3")
 
 

@@ -2,6 +2,8 @@
 // Created by konstantin on 27/02/18.
 //
 #include <string>
+#include <string_view>
+
 #include <boost/asio.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
@@ -16,9 +18,9 @@ public:
     ExchangeConnection(const ExchangeConnection& that) = delete;
     ExchangeConnection&operator=(ExchangeConnection const&) = delete;
 
-    boost::system::error_code getTickerJson(std::string ticker, std::string& strJson);
+    boost::system::error_code getTickerJson(const std::string& ticker, std::string& strJson);
     boost::system::error_code getBalanceJson(std::string& strJson);
-    boost::system::error_code sendOrder(const std::string& ordJson, std::string& responceJson);
+    boost::system::error_code sendOrder(std::string_view ordJson, std::string& responceJson);
     boost::system::error_code establishConnection();
     bool isOpen();
 private:
