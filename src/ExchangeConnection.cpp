@@ -20,7 +20,7 @@ boost::system::error_code ExchangeConnection::establishConnection()
         auto const results = resolver_.resolve(host_, port_);
 
         if (results.empty()) {
-            BOOST_LOG_TRIVIAL(error) << "Can't resolve host :" << host_ << "\n";
+            //BOOST_LOG_TRIVIAL(error) << "Can't resolve host :" << host_ << "\n";
             return boost::asio::error::host_not_found;
         }
 
@@ -33,7 +33,7 @@ boost::system::error_code ExchangeConnection::establishConnection()
             BOOST_LOG_TRIVIAL(info) << "Error opening socket to " << host_ << " :" << port_ << "\n";
             return boost::asio::error::broken_pipe;
         }
-        BOOST_LOG_TRIVIAL(info) << "Opened socket to " << host_ << " :" << port_ << "\n";
+        //BOOST_LOG_TRIVIAL(info) << "Opened socket to " << host_ << " :" << port_ << "\n";
 
 //
 //        http::request<http::string_body> req{http::verb::get, target_, 11};
@@ -54,7 +54,7 @@ boost::system::error_code ExchangeConnection::establishConnection()
 //
     }catch(boost::system::system_error& e)
     {
-        BOOST_LOG_TRIVIAL(error) << "Exception in establish connection " << e.what() << "\n";
+        //BOOST_LOG_TRIVIAL(error) << "Exception in establish connection " << e.what() << "\n";
         return boost::asio::error::not_connected;
     }
     return boost::system::error_code{};
@@ -82,12 +82,12 @@ boost::system::error_code ExchangeConnection::getBalanceJson(std::string& strJso
 
         http::read(socket_, response_buffer, response);
 
-        BOOST_LOG_TRIVIAL(info) << "Got balance from server \n"
+        //BOOST_LOG_TRIVIAL(info) << "Got balance from server \n"
                                 << response.body();
         strJson = std::move(response.body());
     }catch (boost::system::system_error& e)
     {
-        BOOST_LOG_TRIVIAL(error) << "Exception in get balance " << e.what() << "\n";
+        //BOOST_LOG_TRIVIAL(error) << "Exception in get balance " << e.what() << "\n";
         return boost::asio::error::not_connected;
     }
     return boost::system::error_code{};
@@ -115,13 +115,13 @@ boost::system::error_code ExchangeConnection::getTickerJson(std::string ticker, 
 
         http::read(socket_, response_buffer, response);
 
-        BOOST_LOG_TRIVIAL(info) << "Got tickers from server \n"
+        //BOOST_LOG_TRIVIAL(info) << "Got tickers from server \n"
                                 << response.body();
         strJson = std::move(response.body());
 
     }catch (boost::system::system_error& e)
     {
-        BOOST_LOG_TRIVIAL(error) << "Exception in get ticker " << e.what() << "\n";
+        //BOOST_LOG_TRIVIAL(error) << "Exception in get ticker " << e.what() << "\n";
         return boost::asio::error::not_connected;
     }
     return boost::system::error_code{};
@@ -149,12 +149,12 @@ boost::system::error_code ExchangeConnection::sendOrder(const std::string &ordJs
 
         http::read(socket_, response_buffer, response);
 
-        BOOST_LOG_TRIVIAL(info) << "Got made order to server \n"
+        //BOOST_LOG_TRIVIAL(info) << "Got made order to server \n"
                                 << response.body();
         responceJson = std::move(response.body());
     }catch (boost::system::system_error& e)
     {
-        BOOST_LOG_TRIVIAL(error) << "Exception in send order " << e.what() << "\n";
+        //BOOST_LOG_TRIVIAL(error) << "Exception in send order " << e.what() << "\n";
         return boost::asio::error::not_connected;
     }
     return boost::system::error_code{};
