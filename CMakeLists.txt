@@ -16,7 +16,7 @@ set_property(TARGET boost PROPERTY
 
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
-add_executable(botty src/main.cpp src/ExchangeConnection.cpp src/ExchangeConnection.hpp src/order.hpp src/JsonParser.cpp src/JsonParser.hpp src/matrix.cpp src/matrix.hpp src/OrderResponse.hpp src/OptimalOrders.cpp src/OptimalOrders.hpp src/PathFinder.cpp src/PathFinder.hpp)
+add_executable(botty src/main.cpp src/ExchangeConnection.cpp src/ExchangeConnection.hpp src/order.hpp src/JsonParser.cpp src/JsonParser.hpp src/matrix.cpp src/matrix.hpp src/OrderResponse.hpp src/OptimalOrders.cpp src/OptimalOrders.hpp)
 
 
 target_link_libraries(botty
