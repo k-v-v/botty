@@ -12,6 +12,7 @@ namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
 ExchangeConnection::ExchangeConnection(std::string host, std::string port, std::string target)
     : host_(host), port_(port), target_(target), resolver_(ioc_), socket_(ioc_)
 {
+
 }
 
 boost::system::error_code ExchangeConnection::establishConnection()
@@ -24,9 +25,6 @@ boost::system::error_code ExchangeConnection::establishConnection()
             return boost::asio::error::host_not_found;
         }
 
-
-        boost::asio::socket_base::keep_alive keep_alive_option(true);
-        //socket_.set_option(keep_alive_option);
         boost::asio::connect(socket_, results.begin(), results.end());
 
         if (!socket_.is_open()) {
@@ -35,23 +33,23 @@ boost::system::error_code ExchangeConnection::establishConnection()
         }
         //BOOST_LOG_TRIVIAL(info) << "Opened socket to " << host_ << " :" << port_ << "\n";
 
-//
-//        http::request<http::string_body> req{http::verb::get, target_, 11};
-//        req.set(http::field::host, host_);
-//        req.set(http::field::user_agent, "Botty");
-//        req.set(http::field::keep_alive, true);
-//        //Send an http request to keep the connection alive
-//        http::write(socket_, req);
-//
-//        //Buffer to store the reply in
-//        boost::beast::flat_buffer response_buffer;
-//        http::response<http::string_body> response;
-//
-//        http::read(socket_, response_buffer, response);
-//
-//        BOOST_LOG_TRIVIAL(info) << "Got response from server \n"
-//                                << response.body();
-//
+
+        http::request<http::string_body> req{http::verb::get, target_, 11};
+        req.set(http::field::host, host_);
+        req.set(http::field::user_agent, "Botty");
+        req.set(http::field::keep_alive, true);
+
+        //Send an http request to keep the connection alive
+        http::write(socket_, req);
+
+        //Buffer to store the reply in
+        boost::beast::flat_buffer response_buffer;
+        http::response<http::string_body> response;
+
+        http::read(socket_, response_buffer, response);
+
+        BOOST_LOG_TRIVIAL(info) << "Got response from server \n"
+                                << response.body();
     }catch(boost::system::system_error& e)
     {
         //BOOST_LOG_TRIVIAL(error) << "Exception in establish connection " << e.what() << "\n";
@@ -93,7 +91,7 @@ boost::system::error_code ExchangeConnection::getBalanceJson(std::string& strJso
     return boost::system::error_code{};
 }
 
-boost::system::error_code ExchangeConnection::getTickerJsonCached(int tickerId, std::string &strJson)
+boost::system::error_code ExchangeConnection::getTickerJsonCached(int tickerId, std::string& strJson)
 {
     try{
         //Send an http request to keep the connection alive
@@ -124,7 +122,6 @@ boost::system::error_code ExchangeConnection::getTickerJson(const std::string& t
         req.set(http::field::host, host_);
         req.set(http::field::user_agent, "Botty");
         req.set(http::field::keep_alive, true);
-
 
         //Send an http request to keep the connection alive
         http::write(socket_, req);
