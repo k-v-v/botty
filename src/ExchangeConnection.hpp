@@ -17,13 +17,16 @@ public:
     ExchangeConnection(std::string host, std::string port, std::string target);
     ExchangeConnection(const ExchangeConnection& that) = delete;
     ExchangeConnection&operator=(ExchangeConnection const&) = delete;
-
     boost::system::error_code getTickerJson(const std::string& ticker, std::string& strJson);
     boost::system::error_code getBalanceJson(std::string& strJson);
     boost::system::error_code sendOrder(std::string_view ordJson, std::string& responceJson);
     boost::system::error_code establishConnection();
+
+    boost::system::error_code getTickerJsonCached(int tickerId, std::string &strJson);
+    void cacheRequests(const std::vector<std::string>& tickers);
     bool isOpen();
 private:
+    std::vector<boost::beast::http::request<boost::beast::http::string_body>> cached_requests_;
     std::string host_;
     std::string port_;
     std::string target_;

@@ -4,7 +4,7 @@
 
 #include "JsonParser.hpp"
 #include <iostream>
-
+#include <boost/log/trivial.hpp>
 
 
 
@@ -56,7 +56,7 @@ std::string JsonParser::encodeOrder(order order)const
     return (std::string) buffer.GetString();
 }
 
-void JsonParser::decodeResponse(OrderResponse &response, const std::string &str)const
+void JsonParser::parseResponse(OrderResponse &response, const std::string &str)const
 {
     rapidjson::Document doc;
     bool success;
@@ -76,28 +76,28 @@ void JsonParser::decodeResponse(OrderResponse &response, const std::string &str)
     response.status = success ? OrderResponse::order_successful : OrderResponse::order_unsuccessful;
 }
 
-void JsonParser::decodeTickers(matrix &mat, const std::vector<std::string>& json_tickers)const
+void JsonParser::parseTicker(matrix &mat, const std::string& jsonStr)const
 {
-    int i = 0;
-    for (auto& jsonTicker : json_tickers) {
-        rapidjson::Document response;
-        response.Parse(jsonTicker.c_str());
-        if (!initialized_)
-        {
+    //{"base":"USD","date":"2018-03-02","rates":{"AUD":1.2902,"BGN":1.5885,"BRL":3.2567,"CAD":1.288,"CHF":0.93502,"CNY":6.3451,"CZK":20.638,"DKK":6.0493,"EUR":0.81222,"GBP":0.72547,"HKD":7.8295,"HRK":6.0465,"HUF":254.94,"IDR":13778.0,"ILS":3.4526,"INR":65.237,"ISK":100.63,"JPY":105.4,"KRW":1084.1,"MXN":18.928,"MYR":3.9203,"NOK":7.8117,"NZD":1.3819,"PHP":52.009,"PLN":3.4068,"RON":3.7845,"RUB":57.168,"SEK":8.2554,"SGD":1.3207,"THB":31.49,"TRY":3.8173,"ZAR":11.945}}
 
-        }
+    rapidjson::Document doc;
+    doc.Parse(jsonStr.c_str());
 
-        //for each child at index j of response containing a value
-        //  if j == i
-        //      mat(i,j) = 1
-        //  else
-        //      mat(i,j) = (chil at at i).GetDouble();
-        //  j++
+    std::string baseString = doc["base"].GetString();
 
-        i++;
+    int baseID = nameToId_.at(baseString);
+
+    BOOST_LOG_TRIVIAL(error) << "Got base string: " << baseString << " with id: " << baseID << "\n";
+
+    for(auto& pair: doc["rates"].GetObject())
+    {
+        std::string otherString = pair.name.GetString();
+        int otherId = nameToId_.at(otherString);
+        mat[baseID][otherId] = pair.value.GetDouble();
     }
+
 }
-const std::vector<std::string>& JsonParser::getCurrencies()const
+const std::vector<std::string>& JsonParser::getTickers()const
 {
     return idToName_;
 }

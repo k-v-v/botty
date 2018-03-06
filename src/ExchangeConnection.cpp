@@ -30,7 +30,7 @@ boost::system::error_code ExchangeConnection::establishConnection()
         boost::asio::connect(socket_, results.begin(), results.end());
 
         if (!socket_.is_open()) {
-            BOOST_LOG_TRIVIAL(info) << "Error opening socket to " << host_ << " :" << port_ << "\n";
+            //BOOST_LOG_TRIVIAL(info) << "Error opening socket to " << host_ << " :" << port_ << "\n";
             return boost::asio::error::broken_pipe;
         }
         //BOOST_LOG_TRIVIAL(info) << "Opened socket to " << host_ << " :" << port_ << "\n";
@@ -93,18 +93,38 @@ boost::system::error_code ExchangeConnection::getBalanceJson(std::string& strJso
     return boost::system::error_code{};
 }
 
+boost::system::error_code ExchangeConnection::getTickerJsonCached(int tickerId, std::string &strJson)
+{
+    try{
+        //Send an http request to keep the connection alive
+        http::write(socket_, cached_requests_[tickerId]);
+
+        //Buffer to store the reply in
+        boost::beast::flat_buffer response_buffer;
+        http::response<http::string_body> response;
+
+        http::read(socket_, response_buffer, response);
+
+        //BOOST_LOG_TRIVIAL(info) << "Got tickers from server \n"
+        //                        << response.body();
+        strJson = std::move(response.body());
+
+    }catch (boost::system::system_error& e)
+    {
+        //BOOST_LOG_TRIVIAL(error) << "Exception in get ticker " << e.what() << "\n";
+        return boost::asio::error::not_connected;
+    }
+    return boost::system::error_code{};
+}
 
 boost::system::error_code ExchangeConnection::getTickerJson(const std::string& ticker, std::string &strJson)
 {
     try{
-        http::request<http::string_body> req{http::verb::get, target_+"?"+ticker, 11};
+        http::request<http::string_body> req{http::verb::get, target_+"?base="+ticker, 11};
         req.set(http::field::host, host_);
         req.set(http::field::user_agent, "Botty");
         req.set(http::field::keep_alive, true);
-        //Set the request body
-        //req.body() = "GIVE ME ALL THE TICKERS!!!!";
-        //Calculate the body size for the header
-        //req.prepare_payload();
+
 
         //Send an http request to keep the connection alive
         http::write(socket_, req);
@@ -147,6 +167,7 @@ boost::system::error_code ExchangeConnection::sendOrder(std::string_view ordJson
         boost::beast::flat_buffer response_buffer;
         http::response<http::string_body> response;
 
+
         http::read(socket_, response_buffer, response);
 
         //BOOST_LOG_TRIVIAL(info) << "Got made order to server \n"
@@ -158,4 +179,19 @@ boost::system::error_code ExchangeConnection::sendOrder(std::string_view ordJson
         return boost::asio::error::not_connected;
     }
     return boost::system::error_code{};
+}
+
+
+void ExchangeConnection::cacheRequests(const std::vector<std::string>& tickers)
+{
+    //https://api.fixer.io/latest?base=USD
+    for(const std::string& ticker: tickers)
+    {
+        http::request<http::string_body> req{http::verb::get, target_+"?base="+ticker, 11};
+        req.set(http::field::host, host_);
+        req.set(http::field::user_agent, "Botty");
+        req.set(http::field::keep_alive, true);
+
+        cached_requests_.push_back(req);
+    }
 }
