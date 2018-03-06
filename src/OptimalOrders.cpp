@@ -13,7 +13,7 @@ void OptimalOrders::initialize(matrix& initial_rates)
             //the most affordable path of 1 form i to j is to go directly
             if (initial_rates[i][j] > 0)
                 path_[1][i][j] = j;
-            benefits_[0][i][j] = initial_rates[i][j];
+            benefits_[1][i][j] = initial_rates[i][j];
         }
     }
 }
@@ -26,7 +26,7 @@ std::vector <std::tuple<int, int>> OptimalOrders::getOptimalOrder(matrix& initia
     max_profit_len_ = 0;
     max_profit_start_ = 0;
 
-    for (short path_len = 1; path_len < maxN; ++path_len)
+    for (short path_len = 2; path_len <= maxN; ++path_len)
         for (short from = 0; from < NUMBER_CURRENCIES; ++from)
             for (short to = 0; to < NUMBER_CURRENCIES; ++to)
                 for (short through = 0; through < NUMBER_CURRENCIES; ++through)
@@ -61,17 +61,15 @@ std::vector <std::tuple<int, int>> OptimalOrders::ExtractOrdersFromPath()
     std::vector <std::tuple<int, int>> path_to_return;
 
     short path_len = max_profit_len_ - 1, to = max_profit_start_,
-          from = path_[path_len + 1][to][to], prev = max_profit_start_;
+          from = path_[path_len + 1][to][to],
+          prev = to;
 
-    do
-    {
+    while (path_len >= 0) {
         path_to_return.emplace_back(prev, from);
-
         prev = from;
         from = path_[path_len][from][to];
         path_len--;
     }
-    while (path_len > 0);
 
     return path_to_return;
 }
