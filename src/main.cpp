@@ -18,8 +18,6 @@ int main(int argc, char *argv[])
     exchange.establishConnection();
     std::string response;
 
-
-
     exchange.getTickerJson("USD",response);
     std::cout << response<<std::endl;
 
@@ -29,13 +27,13 @@ int main(int argc, char *argv[])
 
 
     matrix mat;
+    auto parseLambda = [&parser, &mat](std::string& jsonStr){
+        parser.parseTicker(mat, jsonStr);
+    };
+    std::cout << "Doing all tickers" << std::endl;
 
-    for (int i=0 ; i < parser.getTickers().size(); i++) {
-        std::cout << "Doing " << parser.getTickers()[i] << std::endl;
-        exchange.getTickerJsonCached(i, response);
-        parser.parseTicker(mat, response);
-        //vstd::cout << " " << response << std::endl;
-    }
+    exchange.getTickersBatch<decltype(parseLambda)>(parseLambda);
+
     std::cout << std::setprecision(2);
     for(int i=0; i < NUMBER_CURRENCIES; i++)
     {

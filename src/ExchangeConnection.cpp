@@ -5,17 +5,14 @@
 #include <boost/log/trivial.hpp>
 #include "ExchangeConnection.hpp"
 
-
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
 
 ExchangeConnection::ExchangeConnection(std::string host, std::string port, std::string target)
-    : host_(host), port_(port), target_(target), resolver_(ioc_), socket_(ioc_)
-{
+        : host_(host), port_(port), target_(target), resolver_(ioc_), socket_(ioc_) {
 }
 
-boost::system::error_code ExchangeConnection::establishConnection()
-{
+boost::system::error_code ExchangeConnection::establishConnection() {
     try {
         auto const results = resolver_.resolve(host_, port_);
 
@@ -46,23 +43,21 @@ boost::system::error_code ExchangeConnection::establishConnection()
 //        //Buffer to store the reply in
 //        boost::beast::flat_buffer response_buffer;
 //        http::response<http::string_body> response;
-//
 //        http::read(socket_, response_buffer, response);
 //
 //        BOOST_LOG_TRIVIAL(info) << "Got response from server \n"
 //                                << response.body();
 //
-    }catch(boost::system::system_error& e)
-    {
+    } catch (boost::system::system_error &e) {
         //BOOST_LOG_TRIVIAL(error) << "Exception in establish connection " << e.what() << "\n";
         return boost::asio::error::not_connected;
     }
     return boost::system::error_code{};
 }
-boost::system::error_code ExchangeConnection::getBalanceJson(std::string& strJson)
-{
 
-    try{
+boost::system::error_code ExchangeConnection::getBalanceJson(std::string &strJson) {
+
+    try {
         http::request<http::string_body> req{http::verb::post, target_, 11};
 
         req.set(http::field::host, host_);
@@ -85,17 +80,15 @@ boost::system::error_code ExchangeConnection::getBalanceJson(std::string& strJso
         //BOOST_LOG_TRIVIAL(info) << "Got balance from server \n"
         //                        << response.body();
         strJson = std::move(response.body());
-    }catch (boost::system::system_error& e)
-    {
+    } catch (boost::system::system_error &e) {
         //BOOST_LOG_TRIVIAL(error) << "Exception in get balance " << e.what() << "\n";
         return boost::asio::error::not_connected;
     }
     return boost::system::error_code{};
 }
 
-boost::system::error_code ExchangeConnection::getTickerJsonCached(int tickerId, std::string &strJson)
-{
-    try{
+boost::system::error_code ExchangeConnection::getTickerJsonCached(int tickerId, std::string &strJson) {
+    try {
         //Send an http request to keep the connection alive
         http::write(socket_, cached_requests_[tickerId]);
 
@@ -109,18 +102,16 @@ boost::system::error_code ExchangeConnection::getTickerJsonCached(int tickerId, 
         //                        << response.body();
         strJson = std::move(response.body());
 
-    }catch (boost::system::system_error& e)
-    {
+    } catch (boost::system::system_error &e) {
         //BOOST_LOG_TRIVIAL(error) << "Exception in get ticker " << e.what() << "\n";
         return boost::asio::error::not_connected;
     }
     return boost::system::error_code{};
 }
 
-boost::system::error_code ExchangeConnection::getTickerJson(const std::string& ticker, std::string &strJson)
-{
-    try{
-        http::request<http::string_body> req{http::verb::get, target_+"?base="+ticker, 11};
+boost::system::error_code ExchangeConnection::getTickerJson(const std::string &ticker, std::string &strJson) {
+    try {
+        http::request<http::string_body> req{http::verb::get, target_ + "?base=" + ticker, 11};
         req.set(http::field::host, host_);
         req.set(http::field::user_agent, "Botty");
         req.set(http::field::keep_alive, true);
@@ -135,12 +126,11 @@ boost::system::error_code ExchangeConnection::getTickerJson(const std::string& t
 
         http::read(socket_, response_buffer, response);
 
-        //BOOST_LOG_TRIVIAL(info) << "Got tickers from server \n"
-        //                        << response.body();
+        BOOST_LOG_TRIVIAL(info) << "Got tickers from server \n" << response.body();
+
         strJson = std::move(response.body());
 
-    }catch (boost::system::system_error& e)
-    {
+    } catch (boost::system::system_error &e) {
         //BOOST_LOG_TRIVIAL(error) << "Exception in get ticker " << e.what() << "\n";
         return boost::asio::error::not_connected;
     }
@@ -148,8 +138,7 @@ boost::system::error_code ExchangeConnection::getTickerJson(const std::string& t
 }
 
 
-boost::system::error_code ExchangeConnection::sendOrder(std::string_view ordJson, std::string &responceJson)
-{
+boost::system::error_code ExchangeConnection::sendOrder(std::string_view ordJson, std::string &responceJson) {
     try {
         http::request<http::string_body> req{http::verb::post, target_, 11};
         req.set(http::field::host, host_);
@@ -173,8 +162,7 @@ boost::system::error_code ExchangeConnection::sendOrder(std::string_view ordJson
         //BOOST_LOG_TRIVIAL(info) << "Got made order to server \n"
         //                        << response.body();
         responceJson = std::move(response.body());
-    }catch (boost::system::system_error& e)
-    {
+    } catch (boost::system::system_error &e) {
         //BOOST_LOG_TRIVIAL(error) << "Exception in send order " << e.what() << "\n";
         return boost::asio::error::not_connected;
     }
@@ -182,12 +170,10 @@ boost::system::error_code ExchangeConnection::sendOrder(std::string_view ordJson
 }
 
 
-void ExchangeConnection::cacheRequests(const std::vector<std::string>& tickers)
-{
+void ExchangeConnection::cacheRequests(const std::vector<std::string> &tickers) {
     //https://api.fixer.io/latest?base=USD
-    for(const std::string& ticker: tickers)
-    {
-        http::request<http::string_body> req{http::verb::get, target_+"?base="+ticker, 11};
+    for (const std::string &ticker: tickers) {
+        http::request<http::string_body> req{http::verb::get, target_ + "?base=" + ticker, 11};
         req.set(http::field::host, host_);
         req.set(http::field::user_agent, "Botty");
         req.set(http::field::keep_alive, true);
