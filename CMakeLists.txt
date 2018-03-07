@@ -20,8 +20,6 @@ include_directories(${Boost_INCLUDE_DIRS})
 add_executable(botty src/main.cpp src/ExchangeConnection.cpp src/ExchangeConnection.hpp src/order.hpp src/JsonParser.cpp src/JsonParser.hpp src/matrix.cpp src/matrix.hpp src/OrderResponse.hpp src/OptimalOrders.cpp src/OptimalOrders.hpp)
 
 target_link_libraries(botty
-        boost_coroutine
-        boost_chrono
         ${Boost_LIBRARIES}
         ${Boost_THREAD_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}

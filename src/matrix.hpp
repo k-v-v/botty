@@ -6,4 +6,5 @@
 
 #define NUMBER_CURRENCIES 33
 
-typedef double matrix[NUMBER_CURRENCIES][NUMBER_CURRENCIES];
+typedef double matrix_type;
+typedef matrix_type matrix[NUMBER_CURRENCIES][NUMBER_CURRENCIES];

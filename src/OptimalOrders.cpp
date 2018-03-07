@@ -4,7 +4,7 @@
 
 #include "OptimalOrders.hpp"
 
-void OptimalOrders::initialize(matrix& initial_rates)
+void OptimalOrders::initialize(const matrix& initial_rates)
 {
     for (short i = 0; i < NUMBER_CURRENCIES; ++i)
     {
@@ -18,7 +18,7 @@ void OptimalOrders::initialize(matrix& initial_rates)
     }
 }
 
-std::vector <std::tuple<int, int>> OptimalOrders::getOptimalOrder(matrix& initial_rates, int maxN, double minProfit)
+std::vector <std::tuple<int, int>> OptimalOrders::getOptimalOrder(const matrix& initial_rates, int maxN, double minProfit)
 {
     OptimalOrders::initialize(initial_rates);
 
@@ -32,7 +32,7 @@ std::vector <std::tuple<int, int>> OptimalOrders::getOptimalOrder(matrix& initia
                 for (short through = 0; through < NUMBER_CURRENCIES; ++through)
                 {
                     double possible_benefit = initial_rates[from][through] * benefits_[path_len - 1][through][to];
-                    double* current_benefit = &benefits_[path_len][from][to];
+                    matrix_type* current_benefit = &benefits_[path_len][from][to];
 
                     if (*current_benefit < possible_benefit)
                     {

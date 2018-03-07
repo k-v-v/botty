@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 
     OptimalOrders path_finder;
     auto start = std::chrono::system_clock::now();
-    auto path = path_finder.getOptimalOrder(mat, 5, 200);
+    auto path = path_finder.getOptimalOrder(mat, 32, 200);
     auto end = std::chrono::system_clock::now();
 
     std::chrono::duration<double> elapsed_seconds = end-start;
