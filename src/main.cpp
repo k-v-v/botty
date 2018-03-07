@@ -30,53 +30,35 @@ int main(int argc, char *argv[])
     exchange.establishConnection();
     std::string response;
 
-
-
     exchange.getTickerJson("USD",response);
-    std::cout << response<<std::endl;
 
     parser.initialize("USD",response);
     exchange.cacheRequests(parser.getTickers());
 
+
+
     matrix mat;
+    auto parseLambda = [&parser, &mat](std::string& jsonStr){
+        parser.parseTicker(mat, jsonStr);
+    };
+    std::cout << "Doing all tickers" << std::endl;
 
-    for (int i=0 ; i < parser.getTickers().size(); i++) {
-        std::cout << "Doing " << parser.getTickers()[i] << std::endl;
-        exchange.getTickerJsonCached(i, response);
-        parser.parseTicker(mat, response);
-        //std::cout << " " << response << std::endl;
+    boost ::system::error_code ec = exchange.getTickersBatch<decltype(parseLambda)>(parseLambda);
+    if(ec)
+    {
+        BOOST_LOG_TRIVIAL(error) << "getTickersBatch error =" << ec.message() << "\n";
     }
-
-
-    OptimalOrders path_finder;
-
-    auto start = std::chrono::system_clock::now();
-    auto path = path_finder.getOptimalOrder(mat, 33, 200);
-    auto end = std::chrono::system_clock::now();
-
-    std::chrono::duration<double> elapsed_seconds = end-start;
-    std::time_t end_time = std::chrono::system_clock::to_time_t(end);
-
-    std::cout << "elapsed time for path finding: " << elapsed_seconds.count() << "s\n";
-
-    double profit = print_path(path, mat);
-
-    std::cout<< profit*100 << "%" <<std::endl;
-
-    ////////////////////////////////////////////
-
-
-
-//    std::cout << std::setprecision(2);
-//    for(int i=0; i < NUMBER_CURRENCIES; i++)
-//    {
-//        std::cout << parser.getTickers()[i] <<":";
-//        for(int j=0; j < NUMBER_CURRENCIES; j++)
-//        {
-//            std::cout << mat[i][j] << " ";
-//        }
-//        std::cout <<std::endl;
-//    }
+    /*
+    std::cout << std::setprecision(2);
+    for(int i=0; i < NUMBER_CURRENCIES; i++)
+    {
+        std::cout << parser.getTickers()[i] <<":";
+        for(int j=0; j < NUMBER_CURRENCIES; j++)
+        {
+            std::cout << mat[i][j] << " ";
+        }
+        std::cout <<std::endl;
+    }*/
 }
 
 double print_path(std::vector<std::tuple<int,int>> path, matrix mat) {
