@@ -26,6 +26,7 @@ public:
     void parseResponse(OrderResponse& response, const std::string& str);
     std::string encodeOrder(order order);
     const std::vector<std::string>& getTickers();
+    int GetGbpIndex();
 private:
     rapidjson::Document doc_;
     std::vector<std::string> idToName_;

@@ -18,7 +18,7 @@ void OptimalOrders::initialize(const matrix& initial_rates)
     }
 }
 
-std::vector <std::tuple<int, int>> OptimalOrders::getOptimalOrder(const matrix& initial_rates, int maxN, double minProfit)
+std::vector <std::tuple<int, int>> OptimalOrders::getOptimalOrder(const matrix& initial_rates, int maxN, double minProfit, double amount_selling, short GBP_index)
 {
     OptimalOrders::initialize(initial_rates);
 
@@ -29,29 +29,32 @@ std::vector <std::tuple<int, int>> OptimalOrders::getOptimalOrder(const matrix& 
     for (short path_len = 2; path_len <= maxN; ++path_len)
         for (short from = 0; from < NUMBER_CURRENCIES; ++from)
             for (short to = 0; to < NUMBER_CURRENCIES; ++to)
-                for (short through = 0; through < NUMBER_CURRENCIES; ++through)
-                {
-                    double possible_benefit = initial_rates[from][through] * benefits_[path_len - 1][through][to];
-                    matrix_type* current_benefit = &benefits_[path_len][from][to];
+            {
+                matrix_type *current_benefit = &benefits_[path_len][from][to];
+                
+                for (short through = 0; through < NUMBER_CURRENCIES; ++through) {
 
-                    if (*current_benefit < possible_benefit)
-                    {
+                    double possible_benefit = initial_rates[from][through] * benefits_[path_len - 1][through][to];
+
+                    if (*current_benefit < possible_benefit) {
                         *current_benefit = (float) possible_benefit;
                         path_[path_len][from][to] = through;
 
                         //if we only consider fro GBP to GBP, then the [from][from] below will be replaced with
                         //[GBP_index][GBP_index] and can be moved outside this loop
-                        if (max_profit_ < benefits_[path_len][from][from])
-                        {
-                            max_profit_ = benefits_[path_len][from][from];
+                        matrix_type *current_profit_rate_for_GBP = &benefits_[path_len][GBP_index][GBP_index];
+                        
+                        if (*current_profit_rate_for_GBP * amount_selling - 10 > max_profit_){
+                            max_profit_ = *current_profit_rate_for_GBP * amount_selling - 10;
                             max_profit_len_ = path_len;
                             max_profit_start_ = from;
 
-                            if (max_profit_ >= minProfit)
+                            if (*current_profit_rate_for_GBP >= minProfit)
                                 return OptimalOrders::ExtractOrdersFromPath();
                         }
                     }
                 }
+            }
 
     return OptimalOrders::ExtractOrdersFromPath();
 }

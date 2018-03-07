@@ -50,18 +50,19 @@ int main(int argc, char *argv[])
     }
 
     OptimalOrders path_finder;
-    auto start = std::chrono::system_clock::now();
-    auto path = path_finder.getOptimalOrder(mat, 32, 200);
-    auto end = std::chrono::system_clock::now();
+    short GBP_index = (int) parser.GetGbpIndex();
+//    auto start = std::chrono::system_clock::now();
+    auto path = path_finder.getOptimalOrder(mat, 32, 200, 1000, GBP_index);
+//    auto end = std::chrono::system_clock::now();
 
-    std::chrono::duration<double> elapsed_seconds = end-start;
-    std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+//    std::chrono::duration<double> elapsed_seconds = end-start;
+//    std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+//
+//    std::cout << "elapsed time for path finding: " << elapsed_seconds.count() << "s\n";
 
-    std::cout << "elapsed time for path finding: " << elapsed_seconds.count() << "s\n";
-
-    double profit = print_path(path, mat);
-
-    std::cout<< profit*100 << "%" <<std::endl;
+//    double profit = print_path(path, mat);
+//
+//    std::cout<< profit*100 << "%" <<std::endl;
 
     /*
     std::cout << std::setprecision(2);

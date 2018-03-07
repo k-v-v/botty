@@ -18,7 +18,6 @@ void JsonParser::initialize(const std::string& basePair, const std::string& tick
     if (initialized_)
         return;
 
-    doc_.Clear();
     doc_.Parse(tickers.c_str());
 
     idToName_.push_back(basePair);
@@ -95,6 +94,12 @@ void JsonParser::parseTicker(matrix &mat, const std::string& jsonStr)
     }
 
 }
+
+int JsonParser::GetGbpIndex()
+{
+    return nameToId_["GBP"];
+}
+
 const std::vector<std::string>& JsonParser::getTickers()
 {
     return idToName_;

@@ -5,6 +5,7 @@
 #pragma once
 
 #include "matrix.hpp"
+#include "JsonParser.hpp"
 
 #include <string>
 #include <tuple>
@@ -15,7 +16,7 @@ typedef short path[NUMBER_CURRENCIES][NUMBER_CURRENCIES][NUMBER_CURRENCIES];
 class OptimalOrders
 {
 public:
-    std::vector <std::tuple<int, int>> getOptimalOrder(const matrix& max, int maxN, double minProfit);
+    std::vector <std::tuple<int, int>> getOptimalOrder(const matrix& max, int maxN, double minProfit, double amount, short GBP_index);
 private:
     double max_profit_;
     short max_profit_len_;
