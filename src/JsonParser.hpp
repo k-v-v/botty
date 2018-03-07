@@ -17,15 +17,17 @@
 #include "order.hpp"
 #include "OrderResponse.hpp"
 
+
 class JsonParser {
 public:
     JsonParser();
-    void initialize(const std::string basePair, const std::string& tickers);
-    void parseTicker(matrix &mat, const std::string& jsonStr)const;
-    void parseResponse(OrderResponse& response, const std::string& str)const;
-    std::string encodeOrder(order order)const;
-    const std::vector<std::string>& getTickers()const;
+    void initialize(const std::string& basePair, const std::string& tickers);
+    void parseTicker(matrix &mat, const std::string& jsonStr);
+    void parseResponse(OrderResponse& response, const std::string& str);
+    std::string encodeOrder(order order);
+    const std::vector<std::string>& getTickers();
 private:
+    rapidjson::Document doc_;
     std::vector<std::string> idToName_;
     std::unordered_map<std::string, int> nameToId_;
     bool initialized_;
