@@ -7,8 +7,6 @@
 #include <boost/log/trivial.hpp>
 
 
-
-
 JsonParser::JsonParser()
 {
     initialized_  = false;
@@ -87,7 +85,7 @@ void JsonParser::parseTicker(matrix &mat, const std::string& jsonStr)const
 
     int baseID = nameToId_.at(baseString);
 
-    BOOST_LOG_TRIVIAL(error) << "Got base string: " << baseString << " with id: " << baseID << "\n";
+    //BOOST_LOG_TRIVIAL(error) << "Got base string: " << baseString << " with id: " << baseID << "\n";
 
     for(auto& pair: doc["rates"].GetObject())
     {

@@ -14,6 +14,11 @@
 #include <boost/system/error_code.hpp>
 
 
+#include <boost/chrono.hpp>
+#include <boost/thread/thread.hpp>
+
+#include <iostream>
+
 class ExchangeConnection
 {
 public:
@@ -26,20 +31,26 @@ public:
         using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
         namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
 
+        
+        boost::system::error_code ec;
         for(auto& req : cached_requests_)
         {
-            http::write(socket_, req);
+            http::write(socket_, req, ec);
+            if(ec)
+            {
+                return ec;
+            }
         }
-
-
+        boost::beast::flat_buffer response_buffer;
         for(auto _: cached_requests_)
         {
-            boost::beast::flat_buffer response_buffer;
             http::response<http::string_body> response;
 
             http::read(socket_, response_buffer, response);
             func(response.body());
         }
+
+
         return boost::system::error_code();
     }
     boost::system::error_code getBalanceJson(std::string& strJson);

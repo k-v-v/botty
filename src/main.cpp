@@ -19,7 +19,6 @@ int main(int argc, char *argv[])
     std::string response;
 
     exchange.getTickerJson("USD",response);
-    std::cout << response<<std::endl;
 
     parser.initialize("USD",response);
     exchange.cacheRequests(parser.getTickers());
@@ -32,8 +31,12 @@ int main(int argc, char *argv[])
     };
     std::cout << "Doing all tickers" << std::endl;
 
-    exchange.getTickersBatch<decltype(parseLambda)>(parseLambda);
-
+    boost ::system::error_code ec = exchange.getTickersBatch<decltype(parseLambda)>(parseLambda);
+    if(ec)
+    {
+        BOOST_LOG_TRIVIAL(error) << "getTickersBatch error =" << ec.message() << "\n";
+    }
+    /*
     std::cout << std::setprecision(2);
     for(int i=0; i < NUMBER_CURRENCIES; i++)
     {
@@ -43,5 +46,5 @@ int main(int argc, char *argv[])
             std::cout << mat[i][j] << " ";
         }
         std::cout <<std::endl;
-    }
+    }*/
 }

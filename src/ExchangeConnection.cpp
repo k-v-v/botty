@@ -177,7 +177,6 @@ void ExchangeConnection::cacheRequests(const std::vector<std::string> &tickers) 
         req.set(http::field::host, host_);
         req.set(http::field::user_agent, "Botty");
         req.set(http::field::keep_alive, true);
-
         cached_requests_.push_back(req);
     }
 }
