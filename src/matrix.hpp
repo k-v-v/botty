@@ -4,7 +4,7 @@
 
 #pragma once
 
-#define NUMBER_CURRENCIES 33
+#define NUMBER_CURRENCIES 4
 
 typedef double matrix_type;
 typedef matrix_type matrix[NUMBER_CURRENCIES][NUMBER_CURRENCIES];
