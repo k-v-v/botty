@@ -4,27 +4,27 @@
 
 #pragma once
 
-
-#include <vector>
-#include <string>
-#include <unordered_map>
+#include "matrix.hpp"
+#include "order.hpp"
+#include "OrderResponse.hpp"
+#include "balance.hpp"
 
 #include <rapidjson/document.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
-#include "matrix.hpp"
-#include "order.hpp"
-#include "OrderResponse.hpp"
+#include <vector>
+#include <string>
+#include <unordered_map>
+
 
 
 class JsonParser {
 public:
     JsonParser();
-    void initialize(const std::string& basePair, const std::string& tickers);
-    void parseTicker(matrix &mat, const std::string& jsonStr);
-    void parseResponse(OrderResponse& response, const std::string& str);
-    std::string encodeOrder(order order);
+    void initializeWithBase(const std::string& marketJson, const std::string& baseName);
+    void parseMarket(const std::string& marketJson, matrix& mat);
+    void parseBalance(const std::string& balanceJson, balance& bal);
     const std::vector<std::string>& getTickers();
 private:
     rapidjson::Document doc_;

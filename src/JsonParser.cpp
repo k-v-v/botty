@@ -3,99 +3,137 @@
 //
 
 #include "JsonParser.hpp"
-#include <iostream>
 #include <boost/log/trivial.hpp>
-
-
+#include <boost/lexical_cast.hpp>
+#include <iostream>
+#include <exception>
 JsonParser::JsonParser()
 {
     initialized_  = false;
 }
-
-
-void JsonParser::initialize(const std::string& basePair, const std::string& tickers)
-{
-    if (initialized_)
-        return;
-
-    doc_.Clear();
-    doc_.Parse(tickers.c_str());
-
-    idToName_.push_back(basePair);
-    nameToId_.insert(std::make_pair(basePair, idToName_.size() - 1));
-    for (auto& e: doc_["rates"].GetObject())
+/**
+ * Sample Json
     {
-        idToName_.push_back(e.name.GetString());
-        nameToId_.insert(std::make_pair(e.name.GetString(), idToName_.size() - 1));
+      "GBPJPY": "GBPJPY 145.3421 145.3429",
+      "EURGBP": "EURGBP 0.9345 0.9349",
+      "EURJPY": "EURJPY 136.7765 136.7771",
+      "USDJPY": "USDJPY 105.6014 105.6018",
+      "EURUSD": "EURUSD 1.2862 1.2864",
+      "GBPUSD": "GBPUSD 1.3755 1.3759"
     }
+ * */
+void JsonParser::initializeWithBase(const std::string& marketJson, const std::string& baseName)
+{
+    if(initialized_)
+    {
+        throw std::invalid_argument("JsonParser is already initialized.");
+    }
+
+    rapidjson::Document doc;
+    doc.Parse(marketJson.c_str());
+
+    if(!baseName.empty())
+    {
+        nameToId_[std::string(baseName)] = 0;
+        idToName_.push_back(std::string(baseName));
+    }
+
+    std::string baseString, quoteString;
+    for(auto& e: doc.GetObject())
+    {
+        //Example str: "GBPJPY"
+        std::string str = e.name.GetString();
+        baseString = str.substr(0,3);
+        quoteString = str.substr(3,3);
+
+
+        if(nameToId_.find(baseString) == nameToId_.end())
+        {
+            nameToId_[baseString] = idToName_.size();
+            idToName_.push_back(baseString);
+        }
+
+        if(nameToId_.find(quoteString) == nameToId_.end())
+        {
+            nameToId_[quoteString] = idToName_.size();
+            idToName_.push_back(quoteString);
+        }
+    }
+
     initialized_ = true;
 }
-std::string JsonParser::encodeOrder(order order)
+void JsonParser::parseMarket(const std::string& marketJson, matrix& mat)
 {
-    rapidjson::Document doc_;
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> result_writer(buffer);
-    rapidjson::Value from(rapidjson::kNumberType),
-                     to(rapidjson::kNumberType),
-                     amount(rapidjson::kNumberType);
-
-    from.SetInt(order.from);
-    to.SetInt(order.to);
-    amount.SetDouble(order.amount);
-
-    doc_.SetObject();
-    doc_.AddMember("from", from, doc_.GetAllocator());
-    doc_.AddMember("to", to, doc_.GetAllocator());
-    doc_.AddMember("amount", amount, doc_.GetAllocator());
-
-    buffer.Clear();
-    doc_.Accept(result_writer);
-
-    return (std::string) buffer.GetString();
-}
-
-void JsonParser::parseResponse(OrderResponse &response, const std::string &str)
-{
-    rapidjson::Document doc_;
-    bool success;
-    double amount;
-    const char* success_tag = "was_successful";
-    const char* amount_tag = "amount_converted";
-    doc_.Parse(str.c_str());
-
-
-    if (!doc_.HasMember(success_tag) || !doc_.HasMember(amount_tag))
-        printf("couldn\'t parse response, returning empty OrderResponse");
-
-    success = doc_[success_tag].GetBool();
-    amount = doc_[amount_tag].GetDouble();
-
-    response.amount = amount;
-    response.status = success ? OrderResponse::order_successful : OrderResponse::order_unsuccessful;
-}
-
-void JsonParser::parseTicker(matrix &mat, const std::string& jsonStr)
-{
-    //{"base":"USD","date":"2018-03-02","rates":{"AUD":1.2902,"BGN":1.5885,"BRL":3.2567,"CAD":1.288,"CHF":0.93502,"CNY":6.3451,"CZK":20.638,"DKK":6.0493,"EUR":0.81222,"GBP":0.72547,"HKD":7.8295,"HRK":6.0465,"HUF":254.94,"IDR":13778.0,"ILS":3.4526,"INR":65.237,"ISK":100.63,"JPY":105.4,"KRW":1084.1,"MXN":18.928,"MYR":3.9203,"NOK":7.8117,"NZD":1.3819,"PHP":52.009,"PLN":3.4068,"RON":3.7845,"RUB":57.168,"SEK":8.2554,"SGD":1.3207,"THB":31.49,"TRY":3.8173,"ZAR":11.945}}
-
-    rapidjson::Document doc_;
-    doc_.Parse(jsonStr.c_str());
-
-    std::string baseString = doc_["base"].GetString();
-
-    int baseID = nameToId_.at(baseString);
-
-    //BOOST_LOG_TRIVIAL(error) << "Got base string: " << baseString << " with id: " << baseID << "\n";
-
-    for(auto& pair: doc_["rates"].GetObject())
+    if(initialized_ == false)
     {
-        std::string otherString = pair.name.GetString();
-        int otherId = nameToId_.at(otherString);
-        mat[baseID][otherId] = pair.value.GetDouble();
+        throw std::invalid_argument("JsonParser isn't initialized.");
+    }
+    rapidjson::Document doc;
+    doc.Parse(marketJson.c_str());
+
+    std::string baseStr, quoteStr;
+    std::string baseValueString, quoteValueString;
+
+    int baseId, quoteId;
+    int spaceLoc;
+    double high, low;
+
+    for(int i=0; i<NUMBER_CURRENCIES; i++)
+        mat[i][i] = 0;
+    for(auto& e: doc.GetObject())
+    {
+        //Parse only the value of the json field
+        std::string str = e.value.GetString();
+
+        baseStr = str.substr(0,3);
+        quoteStr = str.substr(3,3);
+
+
+        baseId = nameToId_[std::string(baseStr)];
+        quoteId = nameToId_[std::string(quoteStr)];
+
+
+        spaceLoc = str.find_last_of(' ');
+
+        baseValueString = str.substr(7, spaceLoc - 7);
+        quoteValueString = str.substr(spaceLoc + 1);
+
+        high = boost::lexical_cast<double>(baseValueString);
+        low =  boost::lexical_cast<double>(quoteValueString);
+
+        mat[baseId][quoteId] = high;
+        mat[quoteId][baseId] = 1/low;
+    }
+}
+void JsonParser::parseBalance(const std::string& balanceJson, balance& bal)
+{
+    if(initialized_ == false)
+    {
+        throw std::invalid_argument("JsonParser isn't initialized.");
     }
 
+    rapidjson::Document doc;
+    doc.Parse(balanceJson.c_str());
+
+    int currID;
+    double currValue;
+    std::string currStr;
+    for(auto& e: bal)
+        e = 0.0;
+    for(auto& e: doc.GetObject())
+    {
+        currStr = e.name.GetString();
+        currValue = e.value.GetDouble();
+
+        currID = nameToId_[currStr];
+        bal[currID] = currValue;
+    }
 }
 const std::vector<std::string>& JsonParser::getTickers()
 {
+    if(initialized_ == false)
+    {
+        throw std::invalid_argument("JsonParser isn't initialized.");
+    }
     return idToName_;
 }
