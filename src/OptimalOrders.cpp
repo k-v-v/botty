@@ -3,6 +3,7 @@
 //
 
 #include "OptimalOrders.hpp"
+#include <iostream>
 
 void OptimalOrders::initialize(const matrix& initial_rates)
 {
@@ -41,9 +42,9 @@ std::vector <std::tuple<int, int>> OptimalOrders::getOptimalOrder(const matrix& 
 
                         //if we only consider fro GBP to GBP, then the [from][from] below will be replaced with
                         //[GBP_index][GBP_index] and can be moved outside this loop
-                        if (max_profit_ < benefits_[path_len][from][from])
+                        if (max_profit_ < benefits_[path_len][0][0])
                         {
-                            max_profit_ = benefits_[path_len][from][from];
+                            max_profit_ = benefits_[path_len][0][0];
                             max_profit_len_ = path_len;
                             max_profit_start_ = from;
 
@@ -72,4 +73,25 @@ std::vector <std::tuple<int, int>> OptimalOrders::ExtractOrdersFromPath()
     }
 
     return path_to_return;
+}
+double OptimalOrders::getProfit(const std::vector<std::tuple<int, int>>& path, const matrix& mat) const
+{
+    double profit = 1.0;
+    std::tuple<int,int> last;
+    for (auto tuple : path)
+    {
+        profit *= mat[std::get<0>(tuple)][std::get<1>(tuple)];
+        last = tuple;
+    }
+    return profit;
+}
+
+void OptimalOrders::printPath(const std::vector<std::tuple<int, int>> &path,const std::vector<std::string>& currencies) const
+{
+    std::tuple<int, int> last;
+    for (auto tuple : path) {
+        //std::cout << currencies[std::get<0>(tuple)] << " -> ";
+        last = tuple;
+    }
+    //std::cout << currencies[std::get<1>(last)] << " " << std::endl;
 }
