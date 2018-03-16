@@ -14,77 +14,68 @@ double print_path(std::vector<std::tuple<int,int>> path, matrix mat);
 
 int main(int argc, char *argv[])
 {
-
-//    OptimalOrders path_finder;
-//    std::cout<<"Testing with a dummy matrix"<<std::endl;
-//    matrix dummy = {{1, 1.7, 2}, {1, 1, 1.5}, {1.6, 1, 1}};
-//    auto path = path_finder.getOptimalOrder(dummy, 3, 200);
-//    auto profit = print_path(path, dummy);
-//
-//    std::cout<< profit*100 << "%" <<std::endl;
-
-
-    https://api.fixer.io/latest
-    ExchangeConnection exchange("api.fixer.io", "80", "/latest");
+    //The parser
     JsonParser parser;
+    //Holds the current account balance
+    balance bal;
+
+    ExchangeConnection exchange("localhost", "8080", "06a094");
     exchange.establishConnection();
-    std::string response;
 
-    exchange.getTickerJson("USD",response);
-
-    parser.initialize("USD",response);
-    exchange.cacheRequests(parser.getTickers());
-
-
+    std::string marketStr;
+    exchange.getMarketJson(marketStr);
+    parser.initializeWithBase(marketStr, "GBP");
 
     matrix mat;
-    auto parseLambda = [&parser, &mat](std::string& jsonStr){
-        parser.parseTicker(mat, jsonStr);
-    };
-    std::cout << "Doing all tickers" << std::endl;
+    while(true) {
+        BOOST_LOG_TRIVIAL(info) << "Started ordering" << std::endl;
+        std::string balStr;
+        exchange.getBalanceJson(balStr);
 
-    boost ::system::error_code ec = exchange.getTickersBatch<decltype(parseLambda)>(parseLambda);
-    if(ec)
-    {
-        BOOST_LOG_TRIVIAL(error) << "getTickersBatch error =" << ec.message() << "\n";
-    }
+        parser.parseBalance(balStr, bal);
+        exchange.getMarketJson(marketStr);
+        parser.parseMarket(marketStr, mat);
 
-    OptimalOrders path_finder;
-    auto start = std::chrono::system_clock::now();
-    auto path = path_finder.getOptimalOrder(mat, 32, 200);
-    auto end = std::chrono::system_clock::now();
-
-    std::chrono::duration<double> elapsed_seconds = end-start;
-    std::time_t end_time = std::chrono::system_clock::to_time_t(end);
-
-    std::cout << "elapsed time for path finding: " << elapsed_seconds.count() << "s\n";
-
-    double profit = print_path(path, mat);
-
-    std::cout<< profit*100 << "%" <<std::endl;
-
-    /*
-    std::cout << std::setprecision(2);
-    for(int i=0; i < NUMBER_CURRENCIES; i++)
-    {
-        std::cout << parser.getTickers()[i] <<":";
-        for(int j=0; j < NUMBER_CURRENCIES; j++)
-        {
-            std::cout << mat[i][j] << " ";
+        /*
+        for (auto &row: mat) {
+            for (auto e:row)
+                std::cout << e << " ";
+            std::cout << std::endl;
         }
-        std::cout <<std::endl;
-    }*/
-}
+        */
+        OptimalOrders path_finder;
+        auto start = std::chrono::system_clock::now();
+        auto path = path_finder.getOptimalOrder(mat, 3, 200);
+        auto end = std::chrono::system_clock::now();
 
-double print_path(std::vector<std::tuple<int,int>> path, matrix mat) {
-    double profit = 1;
-    std::tuple<int,int> last;
-    for (auto tuple : path)
-    {
-        profit *= mat[std::get<0>(tuple)][std::get<1>(tuple)];
-        std::cout << std::get<0>(tuple) << " -> " ;
-        last = tuple;
+        std::chrono::duration<double> elapsed_seconds = end - start;
+        std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+
+        //std::cout << "elapsed time for path finding: " << elapsed_seconds.count() << "s\n";
+
+        path_finder.printPath(path, parser.getTickers());
+        double profit = path_finder.getProfit(path, mat);
+
+
+        double amount = bal[0];
+        std::string pair;
+        auto &tickers = parser.getTickers();
+
+        for (const auto &e: path) {
+            pair = tickers[std::get<0>(e)] + tickers[std::get<1>(e)];
+            exchange.sendOrder(pair, amount, balStr);
+            parser.parseBalance(balStr, bal);
+
+            //std::cout << "amount was" << amount << std::endl;
+            //std::cout << "Balance after transaction is :" << std::endl;
+            //for (auto v: bal)
+            //    std::cout << v << std::endl;
+
+            amount = bal[std::get<1>(e)];
+        }
+
+        BOOST_LOG_TRIVIAL(info) << "Balance now ordering, GBP=" << bal[0]<< std::endl;
+        //std::cout << " Balance after :" << amount << std::endl;
+        //std::cout << profit * 100 << "%" << std::endl;
     }
-    std::cout << std::get<1>(last)  << " " << std::endl;
-    return profit;
 }
