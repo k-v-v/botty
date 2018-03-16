@@ -22,55 +22,57 @@ void JsonParser::initialize(const std::string& basePair, const std::string& tick
 
     idToName_.push_back(basePair);
     nameToId_.insert(std::make_pair(basePair, idToName_.size() - 1));
-    for (auto& e: doc_["rates"].GetObject())
+    for (auto& e: doc_.GetObject())
     {
         idToName_.push_back(e.name.GetString());
         nameToId_.insert(std::make_pair(e.name.GetString(), idToName_.size() - 1));
     }
     initialized_ = true;
 }
-std::string JsonParser::encodeOrder(order order)
+std::vector<std::string> JsonParser::encodeOrder(std::vector<std::tuple<int,int>> orders)
 {
-    rapidjson::Document doc_;
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> result_writer(buffer);
-    rapidjson::Value from(rapidjson::kNumberType),
-                     to(rapidjson::kNumberType),
-                     amount(rapidjson::kNumberType);
+    std::vector<std::string> request_urls(orders.size());
 
-    from.SetInt(order.from);
-    to.SetInt(order.to);
-    amount.SetDouble(order.amount);
+    for (auto tuple : orders)
+    {
+        std::string ccy_pair = idToName_[std::get<0>(tuple)] + idToName_[std::get<1>(tuple)];
+        std::string url = "/trade/077ab1/buy/" + ccy_pair + "/";
+        request_urls.push_back(url);
+    }
 
-    doc_.SetObject();
-    doc_.AddMember("from", from, doc_.GetAllocator());
-    doc_.AddMember("to", to, doc_.GetAllocator());
-    doc_.AddMember("amount", amount, doc_.GetAllocator());
-
-    buffer.Clear();
-    doc_.Accept(result_writer);
-
-    return (std::string) buffer.GetString();
+    return request_urls;
 }
 
-void JsonParser::parseResponse(OrderResponse &response, const std::string &str)
+double JsonParser::parseResponse(std::string& response, std::string sold_currency)
 {
-    rapidjson::Document doc_;
-    bool success;
-    double amount;
-    const char* success_tag = "was_successful";
-    const char* amount_tag = "amount_converted";
-    doc_.Parse(str.c_str());
+//    rapidjson::Document doc_;
+//    bool success;
+//    double amount;
+//    const char* success_tag = "was_successful";
+//    const char* amount_tag = "amount_converted";
+//    doc_.Parse(str.c_str());
+//
+//
+//    if (!doc_.HasMember(success_tag) || !doc_.HasMember(amount_tag))
+//        printf("couldn\'t parse response, returning empty OrderResponse");
+//
+//    success = doc_[success_tag].GetBool();
+//    amount = doc_[amount_tag].GetDouble();
+//
+//    response.amount = amount;
+//    response.status = success ? OrderResponse::order_successful : OrderResponse::order_unsuccessful;
 
+    doc_.Clear();
+    doc_.Parse(response.c_str());
+    const char* error_tag = "error";
 
-    if (!doc_.HasMember(success_tag) || !doc_.HasMember(amount_tag))
-        printf("couldn\'t parse response, returning empty OrderResponse");
+    if (doc_.HasMember(error_tag))
+    {
+        std::cout << doc_[error_tag].GetString();
+        return -1;
+    }
 
-    success = doc_[success_tag].GetBool();
-    amount = doc_[amount_tag].GetDouble();
-
-    response.amount = amount;
-    response.status = success ? OrderResponse::order_successful : OrderResponse::order_unsuccessful;
+    return doc_[sold_currency.c_str()].GetDouble();
 }
 
 void JsonParser::parseTicker(matrix &mat, const std::string& jsonStr)

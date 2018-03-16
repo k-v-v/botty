@@ -138,14 +138,14 @@ boost::system::error_code ExchangeConnection::getTickerJson(const std::string &t
 }
 
 
-boost::system::error_code ExchangeConnection::sendOrder(std::string_view ordJson, std::string &responceJson) {
+boost::system::error_code ExchangeConnection::sendOrder(std::string target, std::string &responceJson) {
     try {
-        http::request<http::string_body> req{http::verb::post, target_, 11};
+        http::request<http::string_body> req{http::verb::get, target, 11};
         req.set(http::field::host, host_);
         req.set(http::field::user_agent, "Botty");
         req.set(http::field::keep_alive, true);
         //Set the request body
-        req.body() = ordJson;
+//        req.body() = ordJson;
         //Calculate the body size for the header
         req.prepare_payload();
 
@@ -168,7 +168,6 @@ boost::system::error_code ExchangeConnection::sendOrder(std::string_view ordJson
     }
     return boost::system::error_code{};
 }
-
 
 void ExchangeConnection::cacheRequests(const std::vector<std::string> &tickers) {
     //https://api.fixer.io/latest?base=USD

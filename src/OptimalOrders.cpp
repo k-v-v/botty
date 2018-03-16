@@ -30,10 +30,10 @@ std::vector <std::tuple<int, int>> OptimalOrders::getOptimalOrder(const matrix& 
         for (short from = 0; from < NUMBER_CURRENCIES; ++from)
             for (short to = 0; to < NUMBER_CURRENCIES; ++to)
             {
-                matrix_type *current_benefit = &benefits_[path_len][from][to];
+
                 
                 for (short through = 0; through < NUMBER_CURRENCIES; ++through) {
-
+                    matrix_type *current_benefit = &benefits_[path_len][from][to];
                     double possible_benefit = initial_rates[from][through] * benefits_[path_len - 1][through][to];
 
                     if (*current_benefit < possible_benefit) {

@@ -11,7 +11,7 @@
 
 
 double print_path(std::vector<std::tuple<int,int>> path, matrix mat);
-
+double current_balance;
 int main(int argc, char *argv[])
 {
 
@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     exchange.establishConnection();
     std::string response;
 
-    exchange.getTickerJson("USD",response);
+    exchange.sendOrder("/market",response);
 
     parser.initialize("USD",response);
     exchange.cacheRequests(parser.getTickers());
@@ -52,7 +52,21 @@ int main(int argc, char *argv[])
     OptimalOrders path_finder;
     short GBP_index = (int) parser.GetGbpIndex();
 //    auto start = std::chrono::system_clock::now();
-    auto path = path_finder.getOptimalOrder(mat, 32, 200, 1000, GBP_index);
+
+    double amount = 1000;
+    auto path = path_finder.getOptimalOrder(mat, 32, 200, amount, GBP_index);
+    auto urls = parser.encodeOrder(path);
+    for (auto url : urls)
+    {
+        url += std::to_string(amount);
+        std::string response;
+        exchange.sendOrder(url, response);
+        std::cout << response <<std::endl;
+        amount = parser.parseResponse(response, url.substr(20, 3));
+    }
+
+    current_balance = amount;
+
 //    auto end = std::chrono::system_clock::now();
 
 //    std::chrono::duration<double> elapsed_seconds = end-start;

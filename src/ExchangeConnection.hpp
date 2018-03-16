@@ -54,7 +54,7 @@ public:
         return boost::system::error_code();
     }
     boost::system::error_code getBalanceJson(std::string& strJson);
-    boost::system::error_code sendOrder(std::string_view ordJson, std::string& responceJson);
+    boost::system::error_code sendOrder(std::string target, std::string& responceJson);
     boost::system::error_code establishConnection();
 
     boost::system::error_code getTickerJsonCached(int tickerId, std::string &strJson);

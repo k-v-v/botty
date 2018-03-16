@@ -23,8 +23,8 @@ public:
     JsonParser();
     void initialize(const std::string& basePair, const std::string& tickers);
     void parseTicker(matrix &mat, const std::string& jsonStr);
-    void parseResponse(OrderResponse& response, const std::string& str);
-    std::string encodeOrder(order order);
+    double parseResponse(std::string& response, std::string str);
+    std::vector<std::string> encodeOrder(std::vector<std::tuple<int,int>>);
     const std::vector<std::string>& getTickers();
     int GetGbpIndex();
 private:
